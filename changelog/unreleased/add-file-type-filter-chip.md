@@ -1,6 +1,6 @@
-Enhancement: Add search mimetype filter
+Enhancement: Add search mediatype filter
 
-Add filter MimeType filter shortcuts to search for specific document types.
+Add filter MediaType filter shortcuts to search for specific document types.
 For example, a search query MimeType:documents will search for files with the following mimetypes:
 
 application/msword
