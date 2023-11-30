@@ -69,7 +69,7 @@ func (h *Handler) createPublicLinkShare(w http.ResponseWriter, r *http.Request, 
 	}
 
 	// NOTE: one is allowed to create an internal link without the `Publink.Write` permission
-	if permKey != nil && *permKey != 0 {
+	if permKey != 0 {
 		ok, err := utils.CheckPermission(ctx, permission.WritePublicLink, c)
 		if err != nil {
 			return nil, &ocsError{
@@ -124,8 +124,8 @@ func (h *Handler) createPublicLinkShare(w http.ResponseWriter, r *http.Request, 
 
 	// default perms: read-only
 	// TODO: the default might change depending on allowed permissions and configs
-	if permKey == nil {
-		permKey = &_defaultPublicLinkPermission
+	if permKey == 0 {
+		permKey = _defaultPublicLinkPermission
 	}
 	permissions, err := ocPublicPermToCs3(permKey)
 	if err != nil {
@@ -137,7 +137,7 @@ func (h *Handler) createPublicLinkShare(w http.ResponseWriter, r *http.Request, 
 	}
 
 	password := r.FormValue("password")
-	if h.enforcePassword(permKey) && len(password) == 0 {
+	if h.enforcePassword(&permKey) && len(password) == 0 {
 		return nil, &ocsError{
 			Code:    response.MetaBadRequest.StatusCode,
 			Message: "missing required password",
@@ -326,7 +326,7 @@ func (h *Handler) updatePublicShare(w http.ResponseWriter, r *http.Request, shar
 	createdByUser := publicshare.IsCreatedByUser(*share, user)
 
 	// NOTE: you are allowed to update a link TO a public link without the `PublicLink.Write` permission if you created it yourself
-	if (permKey != nil && *permKey != 0) || !createdByUser {
+	if permKey != 0 || !createdByUser {
 		ok, err := utils.CheckPermission(ctx, permission.WritePublicLink, gwC)
 		if err != nil {
 			response.WriteOCSError(w, r, response.MetaServerError.StatusCode, "failed to check user permission", err)
@@ -454,8 +454,8 @@ func (h *Handler) updatePublicShare(w http.ResponseWriter, r *http.Request, shar
 	// Password
 	newPassword, ok := r.Form["password"]
 	// enforcePassword
-	if h.enforcePassword(permKey) {
-		p, err := conversions.NewPermissions(decreasePermissionsIfNecessary(*permKey))
+	if h.enforcePassword(&permKey) {
+		p, err := conversions.NewPermissions(decreasePermissionsIfNecessary(permKey))
 		if err != nil {
 			response.WriteOCSError(w, r, response.MetaServerError.StatusCode, "failed to check permissions from request", err)
 			return
@@ -616,12 +616,8 @@ func decreasePermissionsIfNecessary(perm int) int {
 	return perm
 }
 
-func ocPublicPermToCs3(pk *int) (*provider.ResourcePermissions, error) {
-	if pk == nil {
-		return nil, nil
-	}
-
-	permKey := decreasePermissionsIfNecessary(*pk)
+func ocPublicPermToCs3(pk int) (*provider.ResourcePermissions, error) {
+	permKey := decreasePermissionsIfNecessary(pk)
 
 	// TODO refactor this ocPublicPermToRole[permKey] check into a conversions.NewPublicSharePermissions?
 	// not all permissions are possible for public shares
@@ -640,7 +636,7 @@ func ocPublicPermToCs3(pk *int) (*provider.ResourcePermissions, error) {
 }
 
 // pointer will be nil if no permission is set
-func permKeyFromRequest(r *http.Request, h *Handler) (*int, error) {
+func permKeyFromRequest(r *http.Request, h *Handler) (int, error) {
 	var err error
 	// phoenix sends: {"permissions": 15}. See ocPublicPermToRole struct for mapping
 
@@ -655,7 +651,7 @@ func permKeyFromRequest(r *http.Request, h *Handler) (*int, error) {
 		publicUploadFlag, err := strconv.ParseBool(publicUploadString)
 		if err != nil {
 			log.Error().Err(err).Str("publicUpload", publicUploadString).Msg("could not parse publicUpload argument")
-			return nil, err
+			return 0, err
 		}
 
 		if publicUploadFlag {
@@ -666,17 +662,17 @@ func permKeyFromRequest(r *http.Request, h *Handler) (*int, error) {
 		permissionsString := r.FormValue("permissions")
 		if permissionsString == "" {
 			// no permission values given
-			return nil, nil
+			return 0, nil
 		}
 
 		permKey, err = strconv.Atoi(permissionsString)
 		if err != nil {
 			log.Error().Str("permissionFromRequest", "shares").Msgf("invalid type: %T", permKey)
-			return nil, fmt.Errorf("invalid type: %T", permKey)
+			return 0, fmt.Errorf("invalid type: %T", permKey)
 		}
 	}
 
-	return &permKey, nil
+	return permKey, nil
 }
 
 // checkPasswordEnforcement checks if the password needs to be set for a link
