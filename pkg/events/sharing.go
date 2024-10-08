@@ -41,6 +41,7 @@ type ShareCreated struct {
 	GranteeGroupID *group.GroupId
 	Sharee         *provider.Grantee
 	ItemID         *provider.ResourceId
+	Path           string
 	Permissions    *collaboration.SharePermissions
 	CTime          *types.Timestamp
 }
@@ -63,6 +64,7 @@ type ShareRemoved struct {
 	GranteeGroupID *group.GroupId
 
 	ItemID    *provider.ResourceId
+	Path      string
 	Timestamp time.Time
 }
 
@@ -78,6 +80,7 @@ type ShareUpdated struct {
 	Executant      *user.UserId
 	ShareID        *collaboration.ShareId
 	ItemID         *provider.ResourceId
+	Path           string
 	Permissions    *collaboration.SharePermissions
 	GranteeUserID  *user.UserId
 	GranteeGroupID *group.GroupId
@@ -101,6 +104,7 @@ type ShareExpired struct {
 	ShareID    *collaboration.ShareId
 	ShareOwner *user.UserId
 	ItemID     *provider.ResourceId
+	Path       string
 	ExpiredAt  time.Time
 	// split the protobuf Grantee oneof so we can use stdlib encoding/json
 	GranteeUserID  *user.UserId
@@ -119,6 +123,7 @@ type ReceivedShareUpdated struct {
 	Executant      *user.UserId
 	ShareID        *collaboration.ShareId
 	ItemID         *provider.ResourceId
+	Path           string
 	Permissions    *collaboration.SharePermissions
 	GranteeUserID  *user.UserId
 	GranteeGroupID *group.GroupId
@@ -141,6 +146,7 @@ type LinkCreated struct {
 	ShareID           *link.PublicShareId
 	Sharer            *user.UserId
 	ItemID            *provider.ResourceId
+	Path              string
 	Permissions       *link.PublicSharePermissions
 	DisplayName       string
 	Expiration        *types.Timestamp
@@ -162,6 +168,7 @@ type LinkUpdated struct {
 	ShareID           *link.PublicShareId
 	Sharer            *user.UserId
 	ItemID            *provider.ResourceId
+	Path              string
 	Permissions       *link.PublicSharePermissions
 	DisplayName       string
 	Expiration        *types.Timestamp
@@ -185,6 +192,7 @@ type LinkAccessed struct {
 	ShareID           *link.PublicShareId
 	Sharer            *user.UserId
 	ItemID            *provider.ResourceId
+	Path              string
 	Permissions       *link.PublicSharePermissions
 	DisplayName       string
 	Expiration        *types.Timestamp
@@ -225,6 +233,7 @@ type LinkRemoved struct {
 	ShareToken string
 	Timestamp  *types.Timestamp
 	ItemID     *provider.ResourceId
+	Path       string
 }
 
 // Unmarshal to fulfill umarshaller interface

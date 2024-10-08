@@ -51,6 +51,7 @@ func ShareCreated(r *collaboration.CreateShareResponse, executant *user.User) ev
 		GranteeUserID:  r.Share.GetGrantee().GetUserId(),
 		GranteeGroupID: r.Share.GetGrantee().GetGroupId(),
 		ItemID:         r.Share.ResourceId,
+		Path:           utils.ReadPlainFromOpaque(r.Opaque, "path"),
 		CTime:          r.Share.Ctime,
 		Permissions:    r.Share.Permissions,
 	}
@@ -73,6 +74,7 @@ func ShareRemoved(r *collaboration.RemoveShareResponse, req *collaboration.Remov
 		GranteeUserID:  userid,
 		GranteeGroupID: groupid,
 		ItemID:         rid,
+		Path:           utils.ReadPlainFromOpaque(r.Opaque, "path"),
 		Timestamp:      time.Now(),
 	}
 }
@@ -83,6 +85,7 @@ func ShareUpdated(r *collaboration.UpdateShareResponse, req *collaboration.Updat
 		Executant:      executant.GetId(),
 		ShareID:        r.Share.Id,
 		ItemID:         r.Share.ResourceId,
+		Path:           utils.ReadPlainFromOpaque(r.Opaque, "path"),
 		Permissions:    r.Share.Permissions,
 		GranteeUserID:  r.Share.GetGrantee().GetUserId(),
 		GranteeGroupID: r.Share.GetGrantee().GetGroupId(),
@@ -114,6 +117,7 @@ func LinkCreated(r *link.CreatePublicShareResponse, executant *user.User) events
 		ShareID:           r.Share.Id,
 		Sharer:            r.Share.Creator,
 		ItemID:            r.Share.ResourceId,
+		Path:              utils.ReadPlainFromOpaque(r.Opaque, "path"),
 		Permissions:       r.Share.Permissions,
 		DisplayName:       r.Share.DisplayName,
 		Expiration:        r.Share.Expiration,
@@ -130,6 +134,7 @@ func LinkUpdated(r *link.UpdatePublicShareResponse, req *link.UpdatePublicShareR
 		ShareID:           r.Share.Id,
 		Sharer:            r.Share.Creator,
 		ItemID:            r.Share.ResourceId,
+		Path:              utils.ReadPlainFromOpaque(r.Opaque, "path"),
 		Permissions:       r.Share.Permissions,
 		DisplayName:       r.Share.DisplayName,
 		Expiration:        r.Share.Expiration,
@@ -182,6 +187,7 @@ func LinkRemoved(r *link.RemovePublicShareResponse, req *link.RemovePublicShareR
 		ShareToken: req.Ref.GetToken(),
 		Timestamp:  utils.TSNow(),
 		ItemID:     rid,
+		Path:       utils.ReadPlainFromOpaque(r.Opaque, "path"),
 	}
 }
 
